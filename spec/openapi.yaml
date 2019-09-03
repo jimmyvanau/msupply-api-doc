@@ -1,19 +1,12 @@
-# This is an **example** API to demonstrate features of OpenAPI specification.
-# It doesn't cover all OpenAPI features. For more full example check out: https://github.com/APIs-guru/petstore_extended
-
 openapi: 3.0.0
 info:
-  version: '1.0.0' # Your API version
-  # It can be any string but it is better to use semantic versioning: http://semver.org/
-  # Warning: OpenAPI require version to be string, but without quotation YAML can recognize it as number.
-  
-  title: Example.com # Replace with your API title
-  # Keep it simple. Don't add "API" or version at the end of the string.
+  version: '1.0.0'
+  title: mSupply
 
-  termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
+  # termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
   contact:
-    email: contact@example.com # [Optional] Replace with your contact email
-    url: 'http://example.com/contact' # [Optional] Replace with link to your contact form
+    email: support@msupply.org.nz # [Optional] Replace with your contact email
+    url: 'https://docs.msupply.org.nz' # [Optional] Replace with link to your contact form
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -22,13 +15,8 @@ info:
   
   # Describe your API here, you can use GFM (https://guides.github.com/features/mastering-markdown) here
   description: |
-    This is an **example** API to demonstrate features of OpenAPI specification
     # Introduction
-    This specification is intended to to be a good starting point for describing your API in 
-    [OpenAPI/Swagger format](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md).
-    It also demonstrates features of [generator-openapi-repo](https://github.com/Rebilly/generator-openapi-repo) tool and 
-    [ReDoc](https://github.com/Rebilly/ReDoc) documentation engine. So beyond the standard OpenAPI syntax we use a few 
-    [vendor extensions](https://github.com/Rebilly/ReDoc/blob/master/docs/redoc-vendor-extensions.md).
+    This documents the mSupply mobile and sync APIs using the OpenAPI specification.
 
     # OpenAPI Specification
     The goal of The OpenAPI Specification is to define a standard, language-agnostic interface to REST APIs which
@@ -37,23 +25,103 @@ info:
     understand and interact with the remote service with a minimal amount of implementation logic. Similar to what
     interfaces have done for lower-level programming, OpenAPI removes the guesswork in calling the service.
 externalDocs:
-  description: Find out how to create Github repo for your OpenAPI spec.
-  url: 'https://github.com/Rebilly/generator-openapi-repo'
+  description: Find out more about mSupply.
+  url: 'https://docs.msupply.org.nz'
 
 # A list of tags used by the specification with additional metadata.
 # The order of the tags can be used to reflect on their order by the parsing tools.
 tags:
-  - name: Echo
-    description: Example echo operations
-  - name: User
-    description: Operations about user
+  - name: Mobile
+    description: Mobile web interface operations
+  - name: Sync
+    description: Sync/offline/high latency connection operations
 servers:
-  - url: 'http://example.com/api/v1'
-  - url: 'https://example.com/api/v1'
+  - url: 'http://msupplyexample.com/mobile'
 
-# Holds the relative paths to the individual endpoints. The path is appended to the
-# basePath in order to construct the full URL. 
 paths:
+  #'/{type}/{resource}/{resource_id}':
+  # '/items/':
+    # parameters:
+      # - name: item_id
+        # in: path
+        # description: Pretty print response
+        # schema:
+          # type: integer
+    
+    # tags:
+          # - Mobile
+          
+    # get:
+        # summary: Get all items
+  
+        # tags:
+          # - Mobile
+        
+        # description: |
+            # Retrieve all items          
+          
+        
+        # operationId: getAllItems
+          
+        # security:
+          # - basic_auth:
+              # - 'read:users'
+        
+        # responses: # list of responses
+            # '200':
+              # description: Success
+              # content:
+                # application/json:
+                  # example:
+                    # id: 5242
+                    # code: PAR500TAB1000
+                    # item_name: Paracetamol 500mg tablet 1000
+                    # stock_on_hand_tot: 281
+                    
+                
+  
+  '/items/{item_id}':
+    parameters:
+      - name: item_id
+        in: path
+        description: Pretty print response
+        schema:
+          type: integer
+      
+    get:
+      summary: Get items by id
+    
+      tags:
+        - Mobile
+    
+      description: |
+        Retrieve items based on item_id
+      
+      operationId: getItemById
+      
+      security:
+        - basic_auth:
+            - 'read:users'
+            
+      responses: # list of responses
+        '200':
+          description: Success
+          content:
+            application/json:
+              #schema:
+              #  $ref: '#/components/schemas/User'
+              example:
+                department: ABX
+                category: Antibiotics
+                category2: Penicillins
+                stock_on_hand: 7328
+                stock_available: 7128
+#An array with a key of “lines” containing pack_size, available_quantity, batch, expiry_date, sell_price
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
+
   '/users/{username}': # path parameter in curly braces
 
     # parameters list that are used with each operation for this path
@@ -94,9 +162,8 @@ paths:
       
       # security schemas applied to this operation
       security:
-        - main_auth:
+        - basic_auth:
             - 'read:users' # for auth2 provide list of scopes here
-        - api_key: []
       responses: # list of responses
         '200':
           description: Success
@@ -126,7 +193,7 @@ paths:
           schema:
             type: string
       security:
-        - main_auth:
+        - basic_auth:
             - 'write:users'
       responses:
         '200':
@@ -154,7 +221,6 @@ paths:
       description: Receive the exact message you've sent
       operationId: echo
       security:
-        - api_key: []
         - basic_auth: []
       responses:
         '200':
@@ -230,20 +296,6 @@ components:
         format: date-time
   # Security scheme definitions that can be used across the specification.
   securitySchemes:
-    main_auth: # security definition name (you can name it as you want)
-      # the following options are specific to oauth2 type
-      type: oauth2 # authorization type, one of: oauth2, apiKey, http
-      flows:
-        implicit:
-          authorizationUrl: 'http://example.com/api/oauth/dialog'
-          scopes:
-            'read:users': read users info
-            'write:users': modify or remove users
-    api_key:  # security definition name (you can name it as you want)
-      type: apiKey 
-      # The following options are specific to apiKey type
-      in: header # Where API key will be passed: header or query
-      name: api_key # API key parameter name
     basic_auth: # security definition name (you can name it as you want)
       type: http
       scheme: basic
